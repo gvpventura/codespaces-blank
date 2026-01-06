@@ -16,9 +16,8 @@ def login():
         st.session_state.autenticado = False
 
     if not st.session_state.autenticado:
-        # Tenta mostrar a logo, se ela não existir, mostra só texto
         try:
-            st.image("logo.png", width=300) # Ajuste a largura conforme necessário
+            st.image("logo.png", width=300)
         except:
             st.title("Facility Soluções")
             
@@ -40,7 +39,6 @@ def login():
 
 # --- SISTEMA PRINCIPAL ---
 if login():
-    # Menu Lateral com Logo
     with st.sidebar:
         try:
             st.image("logo.png", use_container_width=True)
@@ -52,26 +50,32 @@ if login():
             st.session_state.autenticado = False
             st.rerun()
 
-    # Conteúdo Principal
     st.title("📂 Gestão de Prontuários")
     
     aba_consulta, aba_cadastro, aba_relatorio = st.tabs(["🔍 Consulta", "➕ Novo Aluno", "📊 Relatórios"])
 
-    # ABA 1: Consulta
+  # --- ABA 1: CONSULTA ---
     with aba_consulta:
-        busca = st.text_input("Pesquisar aluno:", placeholder="Nome completo...")
-        if busca:
-            res = supabase.table("alunos").select("*").ilike("nome", f"%{busca}%").limit(50).execute()
+        st.subheader("Busca Rápida Facility") 
+        
+        # O segredo para atualizar rápido é o "key" único
+        busca = st.text_input("Digite o nome:", key="busca_ativa")
+
+        if len(busca) >= 3: # Só faz a busca no banco após 3 letras
+            res = supabase.table("alunos").select("*").ilike("nome", f"%{busca}%").limit(15).execute()
+            
             if res.data:
                 for aluno in res.data:
                     with st.expander(f"👤 {aluno['nome']}"):
+                        st.write(f"**Localização:** {aluno.get('localizacao', '-')}")
                         st.write(f"**Mãe:** {aluno.get('nome_mae', '-')}")
-                        st.write(f"**Status:** {aluno.get('status_arquivo', '-')}")
-                        st.write(f"**Local:** {aluno.get('localizacao', '-')}")
             else:
-                st.warning("Nada encontrado.")
+                st.info("Nenhum aluno encontrado.")
+        
+        elif 0 < len(busca) < 3:
+            st.caption("Continue digitando (mínimo 3 letras)...")
 
-    # ABA 2: Cadastro
+    # --- ABA 2: CADASTRO ---
     with aba_cadastro:
         with st.form("novo_aluno"):
             st.subheader("Novo Registro")
@@ -93,10 +97,11 @@ if login():
                     supabase.table("alunos").insert(dados).execute()
                     st.success(f"{nome} cadastrado!")
 
-    # ABA 3: Relatórios
+    # --- ABA 3: RELATÓRIOS ---
     with aba_relatorio:
         if st.button("Atualizar Gráficos"):
-            df = pd.DataFrame(supabase.table("alunos").select("status_arquivo").execute().data)
+            res = supabase.table("alunos").select("status_arquivo").execute()
+            df = pd.DataFrame(res.data)
             if not df.empty:
                 st.bar_chart(df['status_arquivo'].value_counts())
                 st.metric("Total de Alunos", len(df))
