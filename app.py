@@ -54,32 +54,49 @@ if login():
     
     aba_consulta, aba_cadastro, aba_relatorio = st.tabs(["🔍 Consulta", "➕ Novo Aluno", "📊 Relatórios"])
 
-# --- ABA 1: CONSULTA (Busca Realmente Instantânea) ---
-    with aba_consulta:
-        st.subheader("Busca Rápida Facility")
-        
-        # 1. Buscamos uma lista pequena de nomes apenas para o buscador 'aquecer'
-        # Assim que você começar a digitar aqui dentro, ele filtra sozinho
-        res_nomes = supabase.table("alunos").select("nome").limit(1000).execute()
-        lista_nomes = [aluno['nome'] for aluno in res_nomes.data]
-        
-        # O segredo: st.selectbox com busca habilitada
-        escolha = st.selectbox(
-            "Digite o nome do aluno aqui:",
-            options=[""] + lista_nomes,
-            format_func=lambda x: "🔍 Digite para pesquisar..." if x == "" else x,
-            key="busca_totalmente_viva"
-        )
+from datetime import datetime
 
-        if escolha != "":
-            # Quando você clica no nome que apareceu, ele traz os dados na hora
-            detalhes = supabase.table("alunos").select("*").eq("nome", escolha).execute()
-            if detalhes.data:
-                aluno = detalhes.data[0]
-                st.success(f"✅ Registro: {aluno['nome']}")
+# --- ABA 1: CONSULTA ---
+with aba_consulta:
+    st.subheader("Busca Rápida Facility")
+    
+    # Buscamos os nomes para o seletor
+    res_nomes = supabase.table("alunos").select("nome").limit(1000).execute()
+    lista_nomes = [aluno['nome'] for aluno in res_nomes.data]
+    
+    escolha = st.selectbox(
+        "Digite o nome do aluno aqui:",
+        options=[""] + lista_nomes,
+        format_func=lambda x: "🔍 Digite para pesquisar..." if x == "" else x,
+        key="busca_totalmente_viva"
+    )
+
+    if escolha != "":
+        detalhes = supabase.table("alunos").select("*").eq("nome", escolha).execute()
+        if detalhes.data:
+            aluno = detalhes.data[0]
+            st.success(f"✅ Registro: {aluno['nome']}")
+            
+            # --- LÓGICA PARA FORMATAR A DATA ---
+            data_origem = aluno.get('data_nascimento')
+            data_formatada = "-"
+            
+            if data_origem:
+                try:
+                    # Converte o texto do banco para data e depois para o padrão BR
+                    data_obj = datetime.strptime(data_origem, '%Y-%m-%d')
+                    data_formatada = data_obj.strftime('%d/%m/%Y')
+                except:
+                    # Caso a data no banco esteja em outro formato ou incompleta
+                    data_formatada = data_origem
+
+            col1, col2 = st.columns(2)
+            with col1:
                 st.write(f"**Mãe:** {aluno.get('nome_mae', '-')}")
-                st.write(f"**Data Nasc.::** {aluno.get('data_nascimento', '-')}")
+                st.write(f"**Nascimento:** {data_formatada}") # Exibe a data no padrão DD/MM/AAAA
+            with col2:
                 st.write(f"**Localização:** {aluno.get('localizacao', '-')}")
+                st.write(f"**Status:** {aluno.get('status_arquivo', '-')}")
 
     # --- ABA 2: CADASTRO ---
     with aba_cadastro:
