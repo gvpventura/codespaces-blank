@@ -1,11 +1,12 @@
 import streamlit as st
 from supabase import create_client
 import pandas as pd
+from datetime import datetime  # <--- ESSA LINHA RESOLVE O ERRO DA IMAGEM
 
 # --- CONFIGURAÇÃO INICIAL ---
 st.set_page_config(page_title="Facility - Gestão", page_icon="🏢", layout="centered")
 
-# Conexão (Suas Chaves)
+# Conexão (Verifique se suas chaves estão corretas abaixo)
 URL = "https://ihcrndrwarcywiixypyp.supabase.co"
 KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloY3JuZHJ3YXJjeXdpaXh5cHlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMDMxMTcsImV4cCI6MjA4MjY3OTExN30.58Wd3azYScFkCW0VGkxhvZfgjFYPQgpdzypkoIIuFI4"
 supabase = create_client(URL, KEY)
@@ -81,14 +82,17 @@ with aba_consulta:
             data_origem = aluno.get('data_nascimento')
             data_formatada = "-"
             
-            if data_origem:
+            # Lógica para converter data do banco (2024-12-31) para Brasil (31/12/2024)
+            data_banco = aluno.get('data_nascimento')
+            if data_banco:
                 try:
-                    # Converte o texto do banco para data e depois para o padrão BR
-                    data_obj = datetime.strptime(data_origem, '%Y-%m-%d')
-                    data_formatada = data_obj.strftime('%d/%m/%Y')
+                    data_br = datetime.strptime(data_banco, '%Y-%m-%d').strftime('%d/%m/%Y')
                 except:
-                    # Caso a data no banco esteja em outro formato ou incompleta
-                    data_formatada = data_origem
+                    data_br = data_banco # Mantém original se houver erro
+            else:
+                data_br = "-"
+
+            st.write(f"**Nascimento:** {data_br}")
 
             col1, col2 = st.columns(2)
             with col1:
