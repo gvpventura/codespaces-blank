@@ -54,32 +54,35 @@ if login():
     
     aba_consulta, aba_cadastro, aba_relatorio = st.tabs(["🔍 Consulta", "➕ Novo Aluno", "📊 Relatórios"])
 
-# --- ABA 1: CONSULTA (Busca Sem Enter) ---
+# --- ABA 1: CONSULTA (Busca Reativa Total) ---
     with aba_consulta:
         st.subheader("Busca Rápida Facility")
         
-        # O segredo: usamos o parâmetro 'label_visibility' e um placeholder curto
-        # para enganar o delay do Streamlit
-        busca = st.text_input(
-            "Digite o nome:", 
-            key="busca_instantanea",
-            placeholder="Pesquise aqui..."
-        )
+        # Usamos um campo de texto simples
+        texto_busca = st.text_input("Digite o nome:", key="input_txt").upper()
 
-        # Para forçar a atualização sem Enter, o Streamlit precisa sentir que 
-        # o script deve rodar novamente. O código abaixo faz isso:
-        if len(busca) >= 3:
-            # Busca no Supabase
-            res = supabase.table("alunos").select("*").ilike("nome", f"%{busca}%").limit(10).execute()
+        if len(texto_busca) >= 3:
+            # Buscamos no banco
+            res = supabase.table("alunos").select("*").ilike("nome", f"%{texto_busca}%").limit(15).execute()
             
             if res.data:
-                st.write(f"Resultados para: **{busca}**")
-                for aluno in res.data:
-                    with st.expander(f"👤 {aluno['nome']}"):
-                        st.write(f"**Localização:** {aluno.get('localizacao', '-')}")
-                        st.write(f"**Mãe:** {aluno.get('nome_mae', '-')}")
+                # Criamos uma lista de nomes encontrados
+                nomes_encontrados = [aluno['nome'] for aluno in res.data]
+                
+                # O PULO DO GATO: Um seletor que aparece assim que encontra os nomes
+                escolha = st.selectbox("Selecione o aluno para ver detalhes:", ["-- Clique aqui --"] + nomes_encontrados)
+                
+                if escolha != "-- Clique aqui --":
+                    # Filtra os dados do aluno escolhido
+                    detalhes = next(a for a in res.data if a['nome'] == escolha)
+                    st.success(f"✅ Prontuário de {detalhes['nome']}")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write(f"**Mãe:** {detalhes.get('nome_mae', '-')}")
+                    with col2:
+                        st.write(f"**Localização:** {detalhes.get('localizacao', '-')}")
             else:
-                st.info("Nenhum registro encontrado.")
+                st.warning("Nenhum registro com esse nome.")
 
     # --- ABA 2: CADASTRO ---
     with aba_cadastro:
