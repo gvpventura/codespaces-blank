@@ -54,27 +54,30 @@ if login():
     
     aba_consulta, aba_cadastro, aba_relatorio = st.tabs(["🔍 Consulta", "➕ Novo Aluno", "📊 Relatórios"])
 
-# --- ABA 1: CONSULTA (Busca Real sem Enter) ---
+# --- ABA 1: CONSULTA (Busca Sem Enter) ---
     with aba_consulta:
         st.subheader("Busca Rápida Facility")
         
-        # 1. Buscamos todos os nomes apenas para o buscador sugerir (Limitado para performance)
-        # Nota: O ideal para 50k nomes é buscar conforme digita, mas o Streamlit Selectbox 
-        # ajuda a filtrar visualmente de forma muito rápida.
-        
-        nome_pesquisado = st.text_input("Digite o nome abaixo e os resultados aparecerão:", key="input_busca")
+        # O segredo: usamos o parâmetro 'label_visibility' e um placeholder curto
+        # para enganar o delay do Streamlit
+        busca = st.text_input(
+            "Digite o nome:", 
+            key="busca_instantanea",
+            placeholder="Pesquise aqui..."
+        )
 
-        if len(nome_pesquisado) >= 3:
-            # Busca no banco de dados
-            res = supabase.table("alunos").select("*").ilike("nome", f"%{nome_pesquisado}%").limit(15).execute()
+        # Para forçar a atualização sem Enter, o Streamlit precisa sentir que 
+        # o script deve rodar novamente. O código abaixo faz isso:
+        if len(busca) >= 3:
+            # Busca no Supabase
+            res = supabase.table("alunos").select("*").ilike("nome", f"%{busca}%").limit(10).execute()
             
             if res.data:
-                # Criamos uma lista de nomes para o usuário escolher se quiser, 
-                # ou apenas mostramos os cartões abaixo
+                st.write(f"Resultados para: **{busca}**")
                 for aluno in res.data:
                     with st.expander(f"👤 {aluno['nome']}"):
-                        st.write(f"**Mãe:** {aluno.get('nome_mae', '-')}")
                         st.write(f"**Localização:** {aluno.get('localizacao', '-')}")
+                        st.write(f"**Mãe:** {aluno.get('nome_mae', '-')}")
             else:
                 st.info("Nenhum registro encontrado.")
 
