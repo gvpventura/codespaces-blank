@@ -61,11 +61,36 @@ if not st.session_state.autenticado:
                     st.error("Usuário ou senha incorretos.")
     st.stop()
 
+
 # --- SISTEMA PRINCIPAL (SÓ EXECUTA SE AUTENTICADO) ---
-st.write(f"👤 Bem-vindo(a), **{st.session_state.nome_usuario}**")
+
+# 1. MENU LATERAL (SIDEBAR)
+with st.sidebar:
+    try:
+        # A logo fica no topo da lateral, centralizada automaticamente pelo Streamlit
+        st.image("logo.png", use_container_width=True)
+    except:
+        st.title("Facility Soluções")
+    
+    st.markdown("---")
+    
+    # Informações do Usuário de forma elegante
+    st.markdown(f"### 👤 Usuário\n**{st.session_state.nome_usuario}**")
+    
+    # Botão Sair - Na lateral ele pode ocupar a largura total sem ficar feio
+    if st.button("🚪 Encerrar Sessão", use_container_width=True):
+        st.session_state.autenticado = False
+        st.session_state.nome_usuario = ""
+        st.rerun()
+    
+    st.markdown("---")
+    st.caption("Facility - Gestão de Prontuários v1.0")
+
+# 2. CONTEÚDO PRINCIPAL (OCUPA O RESTO DA TELA)
 st.title("📂 Gestão de Prontuários")
 
 aba_consulta, aba_cadastro, aba_relatorio = st.tabs(["🔍 Consulta", "➕ Novo/Editar", "📊 Relatórios"])
+
 
 # --- ABA 1: CONSULTA ---
 with aba_consulta:
@@ -93,7 +118,7 @@ with aba_consulta:
                 if st.button("🗑️ Excluir"):
                     st.session_state.confirmar_exclusao = aluno['id']
             
-            # Confirmação de exclusão (Corrigida a lógica das linhas 107/108)
+            # Confirmação de exclusão
             if "confirmar_exclusao" in st.session_state and st.session_state.confirmar_exclusao == aluno['id']:
                 st.warning(f"Tem certeza que deseja excluir o prontuário de {aluno['nome']}?")
                 col_sim, col_nao = st.columns(2)
@@ -120,6 +145,7 @@ with aba_consulta:
                 st.write(f"**Data Nasc.:** {dt_exibir}")
             with c2:
                 st.write(f"**Localização:** {aluno.get('localizacao', '-')}")
+                # Importante: Garantindo o uso da coluna correta conforme solicitado
                 st.write(f"**Modalidade:** {aluno.get('ultima_modalidade', '-')}")
                 st.write(f"**Status:** {aluno.get('status_arquivo', '-')}")
 
@@ -134,27 +160,48 @@ with aba_cadastro:
         f_nome = st.text_input("Nome Completo", value=aluno_ref.get('nome', '')).upper()
         f_mae = st.text_input("Nome da Mãe", value=aluno_ref.get('nome_mae', '')).upper()
         
-        # Lógica de Data (evita erro de None no cadastro novo)
         if editando and aluno_ref.get('data_nascimento'):
             d_val = datetime.strptime(aluno_ref['data_nascimento'], '%Y-%m-%d')
         else:
             d_val = datetime(2000, 1, 1)
         
-        f_nasc = st.date_input("Data de Nascimento", value=d_val, min_value=datetime(1900,1,1), format="DD/MM/YYYY")
+        f_nasc = st.date_input(
+    "Data de Nascimento", 
+    value=None,  # Isso deixa o campo vazio
+    min_value=datetime(1900, 1, 1), 
+    format="DD/MM/YYYY"
+)
         
-        opcoes_mod = ["ENSINO FUNDAMENTAL - REGULAR", "ENSINO MEDIO - REGULAR", "PROFISSIONALIZANTE", "CURSO TECNICO", "EJA-ENS. FUNDAMENTAL", "EJA-ENS. MEDIO", "OUTROS"]
+       # 1. MODALIDADE: Adicionamos "" no início da lista
+        opcoes_mod = ["", "ENSINO FUNDAMENTAL - REGULAR", "ENSINO MEDIO - REGULAR", "PROFISSIONALIZANTE", "CURSO TECNICO", "EJA-ENS. FUNDAMENTAL", "EJA-ENS. MEDIO", "OUTROS"]
+        
+        # Se estiver editando, busca o índice da modalidade atual. Se for novo, index é 0 (vazio).
         idx_m = opcoes_mod.index(aluno_ref['ultima_modalidade']) if editando and aluno_ref.get('ultima_modalidade') in opcoes_mod else 0
         f_mod = st.selectbox("Modalidade:", opcoes_mod, index=idx_m)
         
         f_local = st.text_input("Localização (Gaveta/Pasta)", value=aluno_ref.get('localizacao', '')).upper()
-        idx_s = 1 if editando and aluno_ref.get('status_arquivo') == "PERMANENTE" else 0
-        f_status = st.selectbox("Status", ["VIVO", "PERMANENTE"], index=idx_s)
+        
+        # 2. STATUS: Criamos a lista com "" no início
+        opcoes_status = ["", "VIVO", "PERMANENTE"]
+        
+        # Se for edição, identifica se é VIVO (1) ou PERMANENTE (2). Se for novo, é 0 (vazio).
+        if editando:
+            idx_s = opcoes_status.index(aluno_ref.get('status_arquivo')) if aluno_ref.get('status_arquivo') in opcoes_status else 0
+        else:
+            idx_s = 0
+            
+        f_status = st.selectbox("Status", opcoes_status, index=idx_s)
 
         if st.form_submit_button("Atualizar Dados" if editando else "Salvar no Banco"):
-            if f_nome:
+            # 3. VALIDAÇÃO: Impedir de salvar se os campos estiverem vazios
+            if f_nome and f_mod != "" and f_status != "":
                 dados = {
-                    "nome": f_nome, "nome_mae": f_mae, "data_nascimento": str(f_nasc),
-                    "ultima_modalidade": f_mod, "localizacao": f_local, "status_arquivo": f_status
+                    "nome": f_nome, 
+                    "nome_mae": f_mae, 
+                    "data_nascimento": str(f_nasc) if f_nasc else None,
+                    "ultima_modalidade": f_mod, 
+                    "localizacao": f_local, 
+                    "status_arquivo": f_status
                 }
                 try:
                     if editando:
@@ -171,22 +218,27 @@ with aba_cadastro:
                 except Exception as e:
                     st.error(f"Erro: {e}")
             else:
-                st.warning("O nome é obrigatório.")
-
-    if editando:
-        if st.button("❌ Cancelar Edição"):
-            st.session_state.dados_edicao = None
-            st.rerun()
+                st.warning("O Nome, Modalidade e Status são obrigatórios.")
 
 # --- ABA 3: RELATÓRIOS ---
 with aba_relatorio:
     st.subheader("Estatísticas do Acervo")
     res_rel = supabase.table("alunos").select("status_arquivo, ultima_modalidade").execute()
+    
     if res_rel.data:
         df = pd.DataFrame(res_rel.data)
-        c_r1, c_r2 = st.columns(2)
+        
+        # Criamos 3 colunas em vez de 2 para acomodar a nova métrica
+        c_r1, c_r2, c_r3 = st.columns(3)
+        
         c_r1.metric("Total de Alunos", len(df))
         c_r2.metric("Arquivos Vivos", len(df[df['status_arquivo'] == 'VIVO']))
+        
+        # Nova métrica para Arquivos Permanentes
+        c_r3.metric("Arquivos Permanentes", len(df[df['status_arquivo'] == 'PERMANENTE']))
+        
+        st.markdown("---")
+        st.write("### Distribuição por Modalidade")
         st.bar_chart(df['ultima_modalidade'].value_counts())
     else:
         st.info("Sem dados para exibir.")
