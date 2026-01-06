@@ -100,3 +100,12 @@ if login():
                     st.success("Aluno cadastrado com sucesso!")
                 else:
                     st.warning("O nome é obrigatório.")
+                    
+     # --- ABA 3: RELATÓRIOS ---
+    with aba_relatorio:
+        if st.button("Atualizar Gráficos"):
+            res = supabase.table("alunos").select("status_arquivo").execute()
+            df = pd.DataFrame(res.data)
+            if not df.empty:
+                st.bar_chart(df['status_arquivo'].value_counts())
+                st.metric("Total de Alunos", len(df))
