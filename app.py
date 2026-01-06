@@ -54,35 +54,31 @@ if login():
     
     aba_consulta, aba_cadastro, aba_relatorio = st.tabs(["🔍 Consulta", "➕ Novo Aluno", "📊 Relatórios"])
 
-# --- ABA 1: CONSULTA (Busca Reativa Total) ---
+# --- ABA 1: CONSULTA (Busca Realmente Instantânea) ---
     with aba_consulta:
         st.subheader("Busca Rápida Facility")
         
-        # Usamos um campo de texto simples
-        texto_busca = st.text_input("Digite o nome:", key="input_txt").upper()
+        # 1. Buscamos uma lista pequena de nomes apenas para o buscador 'aquecer'
+        # Assim que você começar a digitar aqui dentro, ele filtra sozinho
+        res_nomes = supabase.table("alunos").select("nome").limit(1000).execute()
+        lista_nomes = [aluno['nome'] for aluno in res_nomes.data]
+        
+        # O segredo: st.selectbox com busca habilitada
+        escolha = st.selectbox(
+            "Digite o nome do aluno aqui:",
+            options=[""] + lista_nomes,
+            format_func=lambda x: "🔍 Digite para pesquisar..." if x == "" else x,
+            key="busca_totalmente_viva"
+        )
 
-        if len(texto_busca) >= 3:
-            # Buscamos no banco
-            res = supabase.table("alunos").select("*").ilike("nome", f"%{texto_busca}%").limit(15).execute()
-            
-            if res.data:
-                # Criamos uma lista de nomes encontrados
-                nomes_encontrados = [aluno['nome'] for aluno in res.data]
-                
-                # O PULO DO GATO: Um seletor que aparece assim que encontra os nomes
-                escolha = st.selectbox("Selecione o aluno para ver detalhes:", ["-- Clique aqui --"] + nomes_encontrados)
-                
-                if escolha != "-- Clique aqui --":
-                    # Filtra os dados do aluno escolhido
-                    detalhes = next(a for a in res.data if a['nome'] == escolha)
-                    st.success(f"✅ Prontuário de {detalhes['nome']}")
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.write(f"**Mãe:** {detalhes.get('nome_mae', '-')}")
-                    with col2:
-                        st.write(f"**Localização:** {detalhes.get('localizacao', '-')}")
-            else:
-                st.warning("Nenhum registro com esse nome.")
+        if escolha != "":
+            # Quando você clica no nome que apareceu, ele traz os dados na hora
+            detalhes = supabase.table("alunos").select("*").eq("nome", escolha).execute()
+            if detalhes.data:
+                aluno = detalhes.data[0]
+                st.success(f"✅ Registro: {aluno['nome']}")
+                st.write(f"**Mãe:** {aluno.get('nome_mae', '-')}")
+                st.write(f"**Localização:** {aluno.get('localizacao', '-')}")
 
     # --- ABA 2: CADASTRO ---
     with aba_cadastro:
