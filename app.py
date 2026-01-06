@@ -78,6 +78,7 @@ if login():
                 aluno = detalhes.data[0]
                 st.success(f"✅ Registro: {aluno['nome']}")
                 st.write(f"**Mãe:** {aluno.get('nome_mae', '-')}")
+                st.write(f"**Data Nasc.::** {aluno.get('data_nascimento', '-')}")
                 st.write(f"**Localização:** {aluno.get('localizacao', '-')}")
 
     # --- ABA 2: CADASTRO ---
