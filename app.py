@@ -1,17 +1,17 @@
 import streamlit as st
 from supabase import create_client
 import pandas as pd
-from datetime import datetime  # <--- ESSA LINHA RESOLVE O ERRO DA IMAGEM
+from datetime import datetime  # <--- ESSA LINHA É A QUE RESOLVE O ERRO DA IMAGEM
 
 # --- CONFIGURAÇÃO INICIAL ---
 st.set_page_config(page_title="Facility - Gestão", page_icon="🏢", layout="centered")
 
-# Conexão (Verifique se suas chaves estão corretas abaixo)
+# Conexão (Chaves do seu banco)
 URL = "https://ihcrndrwarcywiixypyp.supabase.co"
 KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloY3JuZHJ3YXJjeXdpaXh5cHlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMDMxMTcsImV4cCI6MjA4MjY3OTExN30.58Wd3azYScFkCW0VGkxhvZfgjFYPQgpdzypkoIIuFI4"
 supabase = create_client(URL, KEY)
 
-# --- FUNÇÃO DE LOGIN ---
+# --- FUNÇÃO DE LOGIN --- 
 def login():
     if "autenticado" not in st.session_state:
         st.session_state.autenticado = False
