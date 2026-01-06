@@ -54,26 +54,29 @@ if login():
     
     aba_consulta, aba_cadastro, aba_relatorio = st.tabs(["🔍 Consulta", "➕ Novo Aluno", "📊 Relatórios"])
 
-  # --- ABA 1: CONSULTA ---
+# --- ABA 1: CONSULTA (Busca Real sem Enter) ---
     with aba_consulta:
-        st.subheader("Busca Rápida Facility") 
+        st.subheader("Busca Rápida Facility")
         
-        # O segredo para atualizar rápido é o "key" único
-        busca = st.text_input("Digite o nome:", key="busca_ativa")
+        # 1. Buscamos todos os nomes apenas para o buscador sugerir (Limitado para performance)
+        # Nota: O ideal para 50k nomes é buscar conforme digita, mas o Streamlit Selectbox 
+        # ajuda a filtrar visualmente de forma muito rápida.
+        
+        nome_pesquisado = st.text_input("Digite o nome abaixo e os resultados aparecerão:", key="input_busca")
 
-        if len(busca) >= 3: # Só faz a busca no banco após 3 letras
-            res = supabase.table("alunos").select("*").ilike("nome", f"%{busca}%").limit(15).execute()
+        if len(nome_pesquisado) >= 3:
+            # Busca no banco de dados
+            res = supabase.table("alunos").select("*").ilike("nome", f"%{nome_pesquisado}%").limit(15).execute()
             
             if res.data:
+                # Criamos uma lista de nomes para o usuário escolher se quiser, 
+                # ou apenas mostramos os cartões abaixo
                 for aluno in res.data:
                     with st.expander(f"👤 {aluno['nome']}"):
-                        st.write(f"**Localização:** {aluno.get('localizacao', '-')}")
                         st.write(f"**Mãe:** {aluno.get('nome_mae', '-')}")
+                        st.write(f"**Localização:** {aluno.get('localizacao', '-')}")
             else:
-                st.info("Nenhum aluno encontrado.")
-        
-        elif 0 < len(busca) < 3:
-            st.caption("Continue digitando (mínimo 3 letras)...")
+                st.info("Nenhum registro encontrado.")
 
     # --- ABA 2: CADASTRO ---
     with aba_cadastro:
