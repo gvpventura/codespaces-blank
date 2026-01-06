@@ -7,13 +7,22 @@ import time
 # --- CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(page_title="Facility - Gestão", page_icon="🏢", layout="centered")
 
-# --- CSS PARA DEIXAR O SITE LIMPO (VISUAL PROFISSIONAL) ---
+# --- CSS PARA DEIXAR O SITE LIMPO (AGRESSIVO) ---
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
             footer {visibility: hidden;}
             header {visibility: hidden;}
             .stDeployButton {display:none;}
+            
+            /* Esconde a marca d'água do Streamlit Cloud no canto inferior direito */
+            div[data-testid="stStatusWidget"] {display:none;}
+            .stApp [data-testid="stDecoration"] {display:none;}
+            
+            /* Remove o link 'Hosted with Streamlit' e o ícone de engrenagem */
+            #viewer-badge {display: none !important;}
+            .viewerBadge_container__1QSob {display: none !important;}
+            [data-testid="bundle-theme-menu"] {display: none !important;}
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
