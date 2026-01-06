@@ -43,43 +43,29 @@ if login():
     # As três abas configuradas corretamente
     aba_consulta, aba_cadastro, aba_relatorio = st.tabs(["🔍 Consulta", "➕ Novo Aluno", "📊 Relatórios"])
 
-    # --- ABA 1: CONSULTA ---
+   # --- ABA 1: CONSULTA (Com Filtro de Precisão) ---
     with aba_consulta:
-        st.subheader("Busca Rápida Facility")
+        st.subheader("Busca Rápida")
         
-        # Busca reativa por Selectbox (Zero Enter)
-        res_nomes = supabase.table("alunos").select("nome").limit(2000).execute()
-        lista_nomes = sorted([aluno['nome'] for aluno in res_nomes.data]) if res_nomes.data else []
+        # Primeiro, um campo de texto simples para você digitar
+        texto_busca = st.text_input("Comece a digitar o nome:", key="txt_input").upper()
         
-        escolha = st.selectbox(
-            "Digite o nome do aluno aqui:",
-            options=[""] + lista_nomes,
-            format_func=lambda x: "🔍 Comece a digitar para pesquisar..." if x == "" else x,
-            key="busca_principal"
-        )
-
-        if escolha != "":
-            detalhes = supabase.table("alunos").select("*").eq("nome", escolha).execute()
-            if detalhes.data:
-                aluno = detalhes.data[0]
+        if len(texto_busca) >= 3:
+            # Buscamos no banco apenas nomes que CONTÉM o que você digitou
+            res = supabase.table("alunos").select("nome").ilike("nome", f"%{texto_busca}%").limit(50).execute()
+            
+            # Criamos a lista filtrada apenas com o que o banco retornou
+            opcoes = [aluno['nome'] for aluno in res.data]
+            
+            if opcoes:
+                escolha = st.selectbox("Selecione o aluno exato na lista:", [""] + opcoes)
                 
-                # Tratamento da Data Brasileira
-                dt_banco = aluno.get('data_nascimento')
-                dt_br = "-"
-                if dt_banco:
-                    try:
-                        dt_br = datetime.strptime(dt_banco, '%Y-%m-%d').strftime('%d/%m/%Y')
-                    except:
-                        dt_br = dt_banco
-
-                st.success(f"✅ Prontuário Localizado: {aluno['nome']}")
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.write(f"**Mãe:** {aluno.get('nome_mae', '-')}")
-                    st.write(f"**Nascimento:** {dt_br}")
-                with c2:
-                    st.write(f"**Localização:** {aluno.get('localizacao', '-')}")
-                    st.write(f"**Status:** {aluno.get('status_arquivo', '-')}")
+                if escolha:
+                    # Aqui ele busca os dados do aluno selecionado
+                    detalhes = supabase.table("alunos").select("*").eq("nome", escolha).execute()
+                    # ... (resto do código de exibição dos dados)
+            else:
+                st.warning("Nenhum nome encontrado com esses termos.")
 
     # --- ABA 2: CADASTRO ---
     with aba_cadastro:
@@ -117,6 +103,9 @@ if login():
                 with col_r2:
                     ativos = len(df[df['status_arquivo'] == 'VIVO'])
                     st.metric("Arquivos Vivos", ativos)
+                with col_r3:
+                    ativos = len(df[df['status_arquivo'] == 'PERMANENTE'])
+                    st.metric("Arquivos Permanentes", ativos)
                 
                 st.write("---")
                 st.bar_chart(df['status_arquivo'].value_counts())
