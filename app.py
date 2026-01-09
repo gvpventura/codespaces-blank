@@ -24,6 +24,15 @@ def registrar_log(acao, aluno, detalhes=""):
     except:
         pass
 
+# --- FUNÇÕES DE ACELERAR BOTAO LIMPAR ---
+@st.cache_data(ttl=300) # Guarda a lista na memória por 5 minutos
+def buscar_lista_nomes():
+    try:
+        res = supabase.table("alunos").select("nome").order("nome").execute()
+        return [aluno['nome'] for aluno in res.data] if res.data else []
+    except:
+        return []
+    
 # --- CONFIGURAÇÃO INICIAL ---
 st.set_page_config(page_title="Facility - Gestão", layout="centered")
 
@@ -98,7 +107,7 @@ if st.session_state.pagina_ativa == "🔍 Consulta":
     if "reset_busca" not in st.session_state: st.session_state.reset_busca = 0
     
     res_nomes = supabase.table("alunos").select("nome").order("nome").execute()
-    lista_nomes = [aluno['nome'] for aluno in res_nomes.data] if res_nomes.data else []
+    lista_nomes = buscar_lista_nomes() # Muito mais rápido!
     
     escolha = st.selectbox("Pesquise o aluno:", options=[""] + lista_nomes, key=f"busca_{st.session_state.reset_busca}")
 
