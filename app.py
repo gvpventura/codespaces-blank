@@ -46,12 +46,17 @@ if "pagina_ativa" not in st.session_state:
 if not st.session_state.autenticado:
     col_l1, col_l2, col_l3 = st.columns([1, 2, 1])
     with col_l2:
-        st.title("Facility Soluções")
+        try:
+            st.image("logo.png", width=250)
+        except:
+            st.title("Facility Soluções")
+            
         st.markdown("### Acesso Restrito")
         with st.form("login_form"):
             usuario = st.text_input("Usuário")
             senha = st.text_input("Senha", type="password")
             entrar = st.form_submit_button("Acessar Sistema", type="primary")
+
             if entrar:
                 res_user = supabase.table("usuarios").select("nome").eq("login", usuario).eq("senha", senha).execute()
                 if res_user.data:
