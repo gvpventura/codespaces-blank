@@ -214,6 +214,9 @@ elif st.session_state.pagina_ativa == "➕ Novo/Editar":
                         supabase.table("alunos").insert(dados).execute()
                         registrar_log("CADASTRO", f_nome)
                     
+                    # --- ESSA É A LINHA QUE RESOLVE O PROBLEMA ---
+                    st.cache_data.clear() # Limpa a memória para buscar a lista atualizada
+                    
                     st.success("✅ Salvo com sucesso!")
                     st.session_state.pagina_ativa = "🔍 Consulta"
                     time.sleep(1)
