@@ -152,7 +152,7 @@ if st.session_state.pagina_ativa == "  Consulta":
                 st.write(f"📅 **Data Nasc.:** {dt_exibir}")
             with c2:
                 loc = aluno.get('localizacao', '-')
-                st.markdown(f'<div style="background-color:#f8f9fa;padding:15px;border-radius:10px;border-left:6px solid #d9534f;"><b>📍 LOCALIZAÇÃO:</b><br><span style="color:#d9534f;font-size:26px;font-weight:bold;">{loc}</span></div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="background-color:#f8f9fa;padding:15px;border-radius:10px;border-left:6px solid #d9534f;"><b>LOCALIZAÇÃO:</b><br><span style="color:#d9534f;font-size:26px;font-weight:bold;">{loc}</span></div>', unsafe_allow_html=True)
                 st.write(f"🎓 **Modalidade:** {aluno.get('ultima_modalidade', '-')}")
                 st.write(f"📌 **Status:** {aluno.get('status_arquivo', '-')}")
 
