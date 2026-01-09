@@ -101,12 +101,11 @@ if c_m3.button("📊 Relatórios", use_container_width=True):
 st.markdown("---")
 
 # --- PÁGINA 1: CONSULTA ---
-if st.session_state.pagina_ativa == "  Consulta":
-    st.subheader("Busca Rápida")
+if st.session_state.pagina_ativa == "🔍 Consulta":
+    st.subheader("🔎 Busca Rápida")
     if "reset_busca" not in st.session_state: st.session_state.reset_busca = 0
     
-    res_nomes = supabase.table("alunos").select("nome").order("nome").execute()
-    lista_nomes = [aluno['nome'] for aluno in res_nomes.data] if res_nomes.data else []
+    lista_nomes = buscar_lista_nomes()
     
     escolha = st.selectbox("Pesquise o aluno:", options=[""] + lista_nomes, key=f"busca_{st.session_state.reset_busca}")
 
@@ -116,30 +115,30 @@ if st.session_state.pagina_ativa == "  Consulta":
             aluno = detalhes.data[0]
             col_msg, col_edit, col_del, col_clear = st.columns([0.4, 0.2, 0.2, 0.2])
             
-            with col_msg: st.success("Registro Localizado!")
+            with col_msg: st.success("✅ Registro Localizado!")
             with col_edit:
-                if st.button("  Editar", use_container_width=True):
+                if st.button("📝 Editar", use_container_width=True):
                     st.session_state.dados_edicao = aluno
-                    st.session_state.pagina_ativa = "  Novo/Editar"
+                    st.session_state.pagina_ativa = "➕ Novo/Editar"
                     st.rerun()
             with col_del:
-                if st.button("  Excluir", use_container_width=True):
+                if st.button("🗑️ Excluir", use_container_width=True):
                     st.session_state.confirmar_exclusao_id = aluno['id']
             with col_clear:
-                if st.button("  Limpar", use_container_width=True):
+                if st.button("🧹 Limpar", use_container_width=True):
                     st.session_state.reset_busca += 1
                     st.session_state.dados_edicao = None
                     st.rerun()
 
             if "confirmar_exclusao_id" in st.session_state and st.session_state.confirmar_exclusao_id == aluno['id']:
-                st.warning(f"Confirmar exclusão de {aluno['nome']}?")
+                st.warning(f"⚠️ Confirmar exclusão de {aluno['nome']}?")
                 cs, cn = st.columns(2)
-                if cs.button("SIM, EXCLUIR", type="primary"):
+                if cs.button("✔️ SIM, EXCLUIR", type="primary"):
                     supabase.table("alunos").delete().eq("id", aluno['id']).execute()
                     st.session_state.reset_busca += 1
                     del st.session_state.confirmar_exclusao_id
                     st.rerun()
-                if cn.button("NÃO"): 
+                if cn.button("✖️ NÃO"): 
                     del st.session_state.confirmar_exclusao_id
                     st.rerun()
 
@@ -152,7 +151,7 @@ if st.session_state.pagina_ativa == "  Consulta":
                 st.write(f"📅 **Data Nasc.:** {dt_exibir}")
             with c2:
                 loc = aluno.get('localizacao', '-')
-                st.markdown(f'<div style="background-color:#f8f9fa;padding:15px;border-radius:10px;border-left:6px solid #d9534f;"><b>LOCALIZAÇÃO:</b><br><span style="color:#d9534f;font-size:26px;font-weight:bold;">{loc}</span></div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="background-color:#f8f9fa;padding:15px;border-radius:10px;border-left:6px solid #d9534f;"><b>📍 LOCALIZAÇÃO:</b><br><span style="color:#d9534f;font-size:26px;font-weight:bold;">{loc}</span></div>', unsafe_allow_html=True)
                 st.write(f"🎓 **Modalidade:** {aluno.get('ultima_modalidade', '-')}")
                 st.write(f"📌 **Status:** {aluno.get('status_arquivo', '-')}")
 
