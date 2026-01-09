@@ -110,15 +110,15 @@ if st.session_state.pagina_ativa == "  Consulta":
             
             with col_msg: st.success("Registro Localizado!")
             with col_edit:
-                if st.button("  Editar", use_container_width=True):
+                if st.button("📝 Editar", use_container_width=True):
                     st.session_state.dados_edicao = aluno
                     st.session_state.pagina_ativa = "  Novo/Editar"
                     st.rerun()
             with col_del:
-                if st.button("  Excluir", use_container_width=True):
+                if st.button("🗑️ Excluir", use_container_width=True):
                     st.session_state.confirmar_exclusao_id = aluno['id']
             with col_clear:
-                if st.button("  Limpar", use_container_width=True):
+                if st.button("🧹 Limpar", use_container_width=True):
                     st.session_state.reset_busca += 1
                     st.session_state.dados_edicao = None
                     st.rerun()
@@ -149,9 +149,9 @@ if st.session_state.pagina_ativa == "  Consulta":
                 st.write(f"**Status:** {aluno.get('status_arquivo', '-')}")
 
 # --- PÁGINA 2: NOVO/EDITAR ---
-elif st.session_state.pagina_ativa == "  Novo/Editar":
+elif st.session_state.pagina_ativa == "➕ Novo/Editar":
     editando = st.session_state.dados_edicao is not None
-    st.subheader("  Editar Registro" if editando else "  Cadastrar Novo Aluno")
+    st.subheader("📝 Editar Registro" if editando else "➕ Cadastrar Novo Aluno")
     aluno_ref = st.session_state.dados_edicao if editando else {}
 
     # --- LÓGICA DA DATA (CAMPO EM BRANCO) ---
@@ -210,15 +210,15 @@ elif st.session_state.pagina_ativa == "  Novo/Editar":
                         supabase.table("alunos").insert(dados).execute()
                         registrar_log("CADASTRO", f_nome) # Opcional, se quiser log
                     
-                    st.success("  Salvo com sucesso!")
-                    st.session_state.pagina_ativa = "  Consulta"
+                    st.success("✅ Salvo com sucesso!")
+                    st.session_state.pagina_ativa = "🔍 Consulta"
                     time.sleep(1)
                     st.rerun()
                 except Exception as e:
                     st.error(f"Erro no banco: {e}")
             else:
                 # SE FALTAR QUALQUER CAMPO, EXIBE ESTE AVISO:
-                st.error("  ERRO: Todos os campos (Nome, Mãe, Data, Modalidade, Localização e Status) devem estar preenchidos!")
+                st.error("⚠️ ERRO: Todos os campos (Nome, Mãe, Data, Modalidade, Localização e Status) devem estar preenchidos!")
 
     # Botão de Cancelar fora do form com KEY ÚNICA para evitar o DuplicateElementId
     if st.button("  Cancelar Operação", key="btn_cancelar_cadastro"):
@@ -256,8 +256,8 @@ elif st.session_state.pagina_ativa == "  Novo/Editar":
                 st.rerun()
 
 # --- PÁGINA 3: RELATÓRIOS ---
-elif st.session_state.pagina_ativa == "  Relatórios":
-    st.subheader("  Estatísticas do Acervo")
+elif st.session_state.pagina_ativa == "📊 Relatórios":
+    st.subheader("📊 Estatísticas do Acervo")
     res_rel = supabase.table("alunos").select("status_arquivo, ultima_modalidade").execute()
    
     if res_rel.data:
@@ -268,7 +268,7 @@ elif st.session_state.pagina_ativa == "  Relatórios":
         c_r3.metric("Arquivos Permanentes", len(df[df['status_arquivo'] == 'PERMANENTE']))
        
         st.markdown("---")
-        st.write("###  Distribuição por Modalidade")
+        st.write("### 📈 Distribuição por Modalidade")
         st.bar_chart(df['ultima_modalidade'].value_counts())
     else:
         st.info("Nenhum registro encontrado no banco de dados.")
