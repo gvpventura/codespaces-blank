@@ -184,10 +184,10 @@ elif st.session_state.pagina_ativa == "➕ Novo/Editar":
         f_local = st.text_input("Localização (Gaveta/Pasta)", value=aluno_ref.get('localizacao', '')).upper()
         
         opcoes_status = ["", "VIVO", "PERMANENTE"]
-        idx_s = opcoes_status.index(aluno_ref.get('status_arquivo')) if editando and aluno_ref.get('status_arquivo') in opcoes_status else 0
+        idx_s = opcoes_status.index(aluno_ref.get('status_arquivo')) if editando and aluno_ref.gegit('status_arquivo') in opcoes_status else 0
         f_status = st.selectbox("Status", opcoes_status, index=idx_s)
 
-        enviar = st.form_submit_button("Atualizar Dados" if editando else "Salvar no Banco")
+        enviar = st.form_submit_button("✅Atualizar Dados" if editando else "✅Salvar no Banco")
 
         if enviar:
             # VOCÊ VAI SUBSTITUIR O QUE ESTIVER DAQUI PARA BAIXO:
