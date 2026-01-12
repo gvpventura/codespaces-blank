@@ -35,6 +35,25 @@ def registrar_log(acao, aluno, detalhes=""):
 # --- CONFIGURAÇÃO INICIAL ---
 st.set_page_config(page_title="Facility - Gestão", layout="centered")
 
+# --- LIMPEZA TOTAL DA INTERFACE ---
+st.markdown("""
+    <style>
+    #MainMenu {visibility: hidden;} /* Esconde o menu de 3 risquinhos */
+    footer {visibility: hidden;}    /* Esconde o 'Made with Streamlit' */
+    header {visibility: hidden;}    /* Esconde a barra superior */
+    
+    /* ESCONDE O ÍCONE FLUTUANTE DO CANTO INFERIOR DIREITO */
+    .stAppDeployButton, .st-emotion-cache-17ziqus, .st-emotion-cache-1wb666 {
+        display: none !important;
+    }
+    
+    /* REMOVE O ESPAÇO EM BRANCO QUE SOBRA NO TOPO */
+    .block-container {
+        padding-top: 1rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Coloque isso logo abaixo do st.set_page_config
 hide_st_style = """
             <style>
