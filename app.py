@@ -144,26 +144,31 @@ if c_m3.button("📊 Relatórios", use_container_width=True):
 st.markdown("---")
 
 # --- PÁGINA 1: CONSULTA ---
-# --- PÁGINA 1: CONSULTA ---
 if st.session_state.pagina_ativa == "🔍 Consulta":
-    # 1. Crie o espaço reservado
-    espaco_busca = st.empty()
+    # 1. Cria o espaço reservado para a interface de busca
+    container_busca = st.empty()
     
-    # 2. Se a variável de reset não existir, inicializa
     if "reset_busca" not in st.session_state: 
         st.session_state.reset_busca = 0
-
-    # 3. Faz a busca silenciosamente (o usuário não verá o nome da função)
+    
+    # 2. Faz o processamento pesado ANTES de desenhar na tela
     lista_nomes = buscar_lista_nomes()
-
-    # 4. Preenche o espaço reservado de uma vez só
-    with espaco_busca.container():
-        st.subheader("🔍 Busca Rápida")
+    
+    # 3. Desenha os componentes de uma só vez dentro do container
+    with container_busca.container():
+        st.subheader("🔎 Busca Rápida")
         escolha = st.selectbox(
             "Pesquise o aluno:", 
             options=[""] + lista_nomes, 
             key=f"busca_{st.session_state.reset_busca}"
         )
+
+    # O restante do código segue a mesma lógica
+    if escolha:
+        detalhes = supabase.table("alunos").select("*").eq("nome", escolha).execute()
+        if detalhes.data:
+            aluno = detalhes.data[0]
+            col_msg, col_edit, col_del, col_clear = st.columns([0.4, 0.2, 0.2, 0.2])
             
             with col_msg: st.success("✅ Registro Localizado!")
             with col_edit:
@@ -202,6 +207,7 @@ if st.session_state.pagina_ativa == "🔍 Consulta":
             with c2:
                 loc = aluno.get('localizacao', '-')
                 st.markdown(f'<div style="background-color:#f8f9fa;padding:15px;border-radius:10px;border-left:6px solid #d9534f;"><b>📍 LOCALIZAÇÃO:</b><br><span style="color:#d9534f;font-size:26px;font-weight:bold;">{loc}</span></div>', unsafe_allow_html=True)
+                # Usando ultima_modalidade conforme sua instrução do banco
                 st.write(f"🎓 **Modalidade:** {aluno.get('ultima_modalidade', '-')}")
                 st.write(f"📌 **Status:** {aluno.get('status_arquivo', '-')}")
 
