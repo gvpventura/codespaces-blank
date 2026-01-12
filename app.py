@@ -35,22 +35,31 @@ def registrar_log(acao, aluno, detalhes=""):
 # --- CONFIGURAÇÃO INICIAL ---
 st.set_page_config(page_title="Facility - Gestão", layout="centered")
 
-# --- LIMPEZA TOTAL DA INTERFACE ---
+# --- LIMPEZA TOTAL E DEFINITIVA DA INTERFACE ---
 st.markdown("""
     <style>
-    #MainMenu {visibility: hidden;} /* Esconde o menu de 3 risquinhos */
-    footer {visibility: hidden;}    /* Esconde o 'Made with Streamlit' */
-    header {visibility: hidden;}    /* Esconde a barra superior */
+    /* 1. Esconde o menu de 3 risquinhos, o cabeçalho e o rodapé padrão */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     
-    /* ESCONDE O ÍCONE FLUTUANTE DO CANTO INFERIOR DIREITO */
-    .stAppDeployButton, .st-emotion-cache-17ziqus, .st-emotion-cache-1wb666 {
+    /* 2. Esconde o botão 'Manage app' e qualquer barra de ferramentas da nuvem */
+    .stAppDeployButton {display: none !important;}
+    div[data-testid="stStatusWidget"] {display: none !important;}
+    
+    /* 3. A MÁGICA: Esconde o ícone redondo/menu flutuante no canto inferior direito */
+    #StyledWindowContainer > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) {
         display: none !important;
     }
     
-    /* REMOVE O ESPAÇO EM BRANCO QUE SOBRA NO TOPO */
-    .block-container {
-        padding-top: 1rem;
+    /* 4. Alvo específico para o botão de ferramentas flutuante */
+    button[title="View profile"], button[aria-label="Manage app"] {
+        display: none !important;
     }
+
+    /* 5. Garante que nada flutuante apareça nos cantos */
+    [data-testid="stToolbar"] {display: none !important;}
+    [data-testid="stDecoration"] {display: none !important;}
     </style>
     """, unsafe_allow_html=True)
 
