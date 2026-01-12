@@ -144,19 +144,26 @@ if c_m3.button("📊 Relatórios", use_container_width=True):
 st.markdown("---")
 
 # --- PÁGINA 1: CONSULTA ---
+# --- PÁGINA 1: CONSULTA ---
 if st.session_state.pagina_ativa == "🔍 Consulta":
-    st.subheader("🔎 Busca Rápida")
-    if "reset_busca" not in st.session_state: st.session_state.reset_busca = 0
+    # 1. Crie o espaço reservado
+    espaco_busca = st.empty()
     
-    lista_nomes = buscar_lista_nomes()
-    
-    escolha = st.selectbox("Pesquise o aluno:", options=[""] + lista_nomes, key=f"busca_{st.session_state.reset_busca}")
+    # 2. Se a variável de reset não existir, inicializa
+    if "reset_busca" not in st.session_state: 
+        st.session_state.reset_busca = 0
 
-    if escolha:
-        detalhes = supabase.table("alunos").select("*").eq("nome", escolha).execute()
-        if detalhes.data:
-            aluno = detalhes.data[0]
-            col_msg, col_edit, col_del, col_clear = st.columns([0.4, 0.2, 0.2, 0.2])
+    # 3. Faz a busca silenciosamente (o usuário não verá o nome da função)
+    lista_nomes = buscar_lista_nomes()
+
+    # 4. Preenche o espaço reservado de uma vez só
+    with espaco_busca.container():
+        st.subheader("🔍 Busca Rápida")
+        escolha = st.selectbox(
+            "Pesquise o aluno:", 
+            options=[""] + lista_nomes, 
+            key=f"busca_{st.session_state.reset_busca}"
+        )
             
             with col_msg: st.success("✅ Registro Localizado!")
             with col_edit:
