@@ -38,28 +38,32 @@ st.set_page_config(page_title="Facility - Gestão", layout="centered")
 # --- LIMPEZA TOTAL E DEFINITIVA DA INTERFACE ---
 st.markdown("""
     <style>
-    /* 1. Esconde o menu de 3 risquinhos, o cabeçalho e o rodapé padrão */
+    /* Esconde a barra de ferramentas superior e rodapé padrão */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* 2. Esconde o botão 'Manage app' e qualquer barra de ferramentas da nuvem */
-    .stAppDeployButton {display: none !important;}
-    div[data-testid="stStatusWidget"] {display: none !important;}
-    
-    /* 3. A MÁGICA: Esconde o ícone redondo/menu flutuante no canto inferior direito */
-    #StyledWindowContainer > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) {
-        display: none !important;
-    }
-    
-    /* 4. Alvo específico para o botão de ferramentas flutuante */
-    button[title="View profile"], button[aria-label="Manage app"] {
+    /* REMOVE A BARRA INFERIOR DIREITA (Manage App / Ferramentas da Nuvem) */
+    div[data-testid="stStatusWidget"] {
         display: none !important;
     }
 
-    /* 5. Garante que nada flutuante apareça nos cantos */
-    [data-testid="stToolbar"] {display: none !important;}
-    [data-testid="stDecoration"] {display: none !important;}
+    /* ESCONDE O BOTÃO DE DEPLOY/SHARE QUE PODE SOBRAR */
+    .stAppDeployButton {
+        display: none !important;
+    }
+
+    /* REMOVE O ESPAÇO EXTRA QUE ESSAS BARRAS OCUPAM */
+    .stAppViewBlockContainer {
+        padding-bottom: 0px !important;
+    }
+    
+    /* TIRA O FOCO DO BOTÃO FLUTUANTE QUE APARECE AO PASSAR O MOUSE */
+    button[title="View profile"], 
+    button[aria-label="Manage app"],
+    [data-testid="stToolbar"] {
+        display: none !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
