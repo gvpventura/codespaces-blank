@@ -33,39 +33,53 @@ def registrar_log(acao, aluno, detalhes=""):
         pass
 
 # --- CONFIGURAÇÃO INICIAL ---
-st.set_page_config(page_title="Facility - Gestão", layout="centered")
+st.set_page_config(
+    page_title="Facility - Gestão",
+    page_icon="logo.png",
+    layout="centered",
+    initial_sidebar_state="collapsed"  # Começa fechado, mas permite abrir
+)
 
-# --- LIMPEZA TOTAL E DEFINITIVA DA INTERFACE ---
+# --- LIMPEZA TOTAL E DEFINITIVA DA INTERFACE (VERSÃO COM MENU ATIVO) ---
 st.markdown("""
     <style>
-    /* Esconde a barra de ferramentas superior e rodapé padrão */
-    #MainMenu {visibility: hidden;}
+    /* 1. Esconde a barra de ferramentas (3 pontinhos), mas MANTÉM o header para o botão existir */
+    [data-testid="stToolbar"] {visibility: hidden !important;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
     
-    /* REMOVE A BARRA INFERIOR DIREITA (Manage App / Ferramentas da Nuvem) */
+    /* 2. REMOVE A BARRA INFERIOR DIREITA (Manage App) */
     div[data-testid="stStatusWidget"] {
         display: none !important;
     }
 
-    /* ESCONDE O BOTÃO DE DEPLOY/SHARE QUE PODE SOBRAR */
+    /* 3. ESCONDE O BOTÃO DE DEPLOY/SHARE */
     .stAppDeployButton {
         display: none !important;
     }
 
-    /* REMOVE O ESPAÇO EXTRA QUE ESSAS BARRAS OCUPAM */
+    /* 4. GARANTE QUE O BOTÃO DE ABRIR O MENU FIQUE VISÍVEL E BONITO */
+    [data-testid="stSidebarCollapseButton"] {
+        visibility: visible !important;
+        display: flex !important;
+        color: #d9534f !important; /* Cor vermelha para destacar no topo */
+        background-color: transparent !important;
+    }
+
+    /* 5. REMOVE O ESPAÇO EXTRA NO TOPO */
     .stAppViewBlockContainer {
+        padding-top: 30px !important;
         padding-bottom: 0px !important;
     }
     
-    /* TIRA O FOCO DO BOTÃO FLUTUANTE QUE APARECE AO PASSAR O MOUSE */
+    /* 6. TIRA O FOCO DE OUTROS BOTÕES FLUTUANTES */
     button[title="View profile"], 
-    button[aria-label="Manage app"],
-    [data-testid="stToolbar"] {
+    button[aria-label="Manage app"] {
         display: none !important;
     }
     </style>
     """, unsafe_allow_html=True)
+
+
 
 # Coloque isso logo abaixo do st.set_page_config
 hide_st_style = """
