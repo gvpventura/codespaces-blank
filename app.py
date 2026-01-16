@@ -33,56 +33,7 @@ def registrar_log(acao, aluno, detalhes=""):
         pass
 
 # --- CONFIGURAÇÃO INICIAL ---
-st.set_page_config(
-    page_title="Facility - Gestão",
-    page_icon="logo.png",
-    layout="centered",
-    initial_sidebar_state="collapsed"
-)
-
-# --- ESTILIZAÇÃO E LIMPEZA (BLOCO ÚNICO) ---
-st.markdown("""
-    <style>
-    /* 1. Esconde a linha colorida do topo e os 3 pontinhos (Toolbar) */
-    [data-testid="stDecoration"], 
-    [data-testid="stToolbar"] {
-        display: none !important;
-    }
-
-    /* 2. Força o botão de abrir/fechar o menu a ficar visível */
-    [data-testid="stSidebarCollapseButton"] {
-        visibility: visible !important;
-        display: flex !important;
-        position: fixed !important;
-        top: 15px !important;
-        left: 15px !important;
-        color: #d9534f !important;
-        z-index: 999999;
-    }
-
-    /* 3. Esconde o botão de Deploy e o rodapé */
-    .stAppDeployButton, footer {
-        display: none !important;
-    }
-
-    /* 4. Ajusta o respiro do topo para o conteúdo não subir demais */
-    .stAppViewBlockContainer {
-        padding-top: 3.5rem !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-
-
-# Coloque isso logo abaixo do st.set_page_config
-hide_st_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            #stDecoration {display:none;}
-            </style>
-            """
-st.markdown(hide_st_style, unsafe_allow_html=True)
+st.set_page_config(page_title="Facility - Gestão", layout="centered")
 
 # Conexão
 URL = "https://ihcrndrwarcywiixypyp.supabase.co"
@@ -107,7 +58,7 @@ if not st.session_state.autenticado:
             st.image("logo.png", width=250)
         except:
             st.title("Facility Soluções")
-            
+           
         st.markdown("### 🔒 Acesso Restrito")
         with st.form("login_form"):
             usuario = st.text_input("👤 Usuário")
@@ -140,42 +91,30 @@ with st.sidebar:
 # --- NAVEGAÇÃO ---
 st.title("📂 Gestão de Prontuários")
 c_m1, c_m2, c_m3 = st.columns(3)
-if c_m1.button("🔍 Consulta", use_container_width=True): 
+if c_m1.button("🔍 Consulta", use_container_width=True):
     st.session_state.pagina_ativa = "🔍 Consulta"; st.rerun()
-if c_m2.button("➕ Novo/Editar", use_container_width=True): 
+if c_m2.button("➕ Novo/Editar", use_container_width=True):
     st.session_state.pagina_ativa = "➕ Novo/Editar"; st.rerun()
-if c_m3.button("📊 Relatórios", use_container_width=True): 
+if c_m3.button("📊 Relatórios", use_container_width=True):
     st.session_state.pagina_ativa = "📊 Relatórios"; st.rerun()
 
 st.markdown("---")
 
 # --- PÁGINA 1: CONSULTA ---
 if st.session_state.pagina_ativa == "🔍 Consulta":
-    # 1. Cria o espaço reservado para a interface de busca
-    container_busca = st.empty()
-    
-    if "reset_busca" not in st.session_state: 
-        st.session_state.reset_busca = 0
-    
-    # 2. Faz o processamento pesado ANTES de desenhar na tela
+    st.subheader("🔎 Busca Rápida")
+    if "reset_busca" not in st.session_state: st.session_state.reset_busca = 0
+   
     lista_nomes = buscar_lista_nomes()
-    
-    # 3. Desenha os componentes de uma só vez dentro do container
-    with container_busca.container():
-        st.subheader("🔎 Busca Rápida")
-        escolha = st.selectbox(
-            "Pesquise o aluno:", 
-            options=[""] + lista_nomes, 
-            key=f"busca_{st.session_state.reset_busca}"
-        )
+   
+    escolha = st.selectbox("Pesquise o aluno:", options=[""] + lista_nomes, key=f"busca_{st.session_state.reset_busca}")
 
-    # O restante do código segue a mesma lógica
     if escolha:
         detalhes = supabase.table("alunos").select("*").eq("nome", escolha).execute()
         if detalhes.data:
             aluno = detalhes.data[0]
             col_msg, col_edit, col_del, col_clear = st.columns([0.4, 0.2, 0.2, 0.2])
-            
+           
             with col_msg: st.success("✅ Registro Localizado!")
             with col_edit:
                 if st.button("📝 Editar", use_container_width=True):
@@ -199,7 +138,7 @@ if st.session_state.pagina_ativa == "🔍 Consulta":
                     st.session_state.reset_busca += 1
                     del st.session_state.confirmar_exclusao_id
                     st.rerun()
-                if cn.button("✖️ NÃO"): 
+                if cn.button("✖️ NÃO"):
                     del st.session_state.confirmar_exclusao_id
                     st.rerun()
 
@@ -213,7 +152,6 @@ if st.session_state.pagina_ativa == "🔍 Consulta":
             with c2:
                 loc = aluno.get('localizacao', '-')
                 st.markdown(f'<div style="background-color:#f8f9fa;padding:15px;border-radius:10px;border-left:6px solid #d9534f;"><b>📍 LOCALIZAÇÃO:</b><br><span style="color:#d9534f;font-size:26px;font-weight:bold;">{loc}</span></div>', unsafe_allow_html=True)
-                # Usando ultima_modalidade conforme sua instrução do banco
                 st.write(f"🎓 **Modalidade:** {aluno.get('ultima_modalidade', '-')}")
                 st.write(f"📌 **Status:** {aluno.get('status_arquivo', '-')}")
 
@@ -224,31 +162,31 @@ elif st.session_state.pagina_ativa == "➕ Novo/Editar":
     aluno_ref = st.session_state.dados_edicao if editando else {}
 
     if editando and aluno_ref.get('data_nascimento'):
-        try: 
+        try:
             d_padrao = datetime.strptime(aluno_ref['data_nascimento'], '%Y-%m-%d').date()
-        except: 
+        except:
             d_padrao = None
-    else: 
-        d_padrao = None 
+    else:
+        d_padrao = None
 
     with st.form("form_unico", clear_on_submit=not editando):
         f_nome = st.text_input("Nome Completo", value=aluno_ref.get('nome', '')).upper()
         f_mae = st.text_input("Nome da Mãe", value=aluno_ref.get('nome_mae', '')).upper()
-        
+       
         f_nasc = st.date_input(
-            "Data de Nascimento", 
-            value=d_padrao, 
-            min_value=date(1920, 1, 1), 
+            "Data de Nascimento",
+            value=d_padrao,
+            min_value=date(1920, 1, 1),
             max_value=date.today(),
             format="DD/MM/YYYY"
         )
-        
+       
         opcoes_mod = ["", "ENSINO FUNDAMENTAL - REGULAR", "ENSINO MEDIO - REGULAR", "PROFISSIONALIZANTE", "CURSO TECNICO", "EJA-ENS. FUNDAMENTAL", "EJA-ENS. MEDIO", "OUTROS"]
         idx_m = opcoes_mod.index(aluno_ref['ultima_modalidade']) if editando and aluno_ref.get('ultima_modalidade') in opcoes_mod else 0
         f_mod = st.selectbox("Modalidade:", opcoes_mod, index=idx_m)
-        
+       
         f_local = st.text_input("Localização (Gaveta/Pasta)", value=aluno_ref.get('localizacao', '')).upper()
-        
+       
         opcoes_status = ["", "VIVO", "PERMANENTE"]
         idx_s = opcoes_status.index(aluno_ref.get('status_arquivo')) if editando and aluno_ref.get('status_arquivo') in opcoes_status else 0
         f_status = st.selectbox("Status", opcoes_status, index=idx_s)
@@ -266,7 +204,7 @@ elif st.session_state.pagina_ativa == "➕ Novo/Editar":
                     "localizacao": remover_acentos(f_local),
                     "status_arquivo": f_status
                 }
-                
+               
                 try:
                     if editando:
                         supabase.table("alunos").update(dados).eq("id", aluno_ref.get('id')).execute()
@@ -275,10 +213,10 @@ elif st.session_state.pagina_ativa == "➕ Novo/Editar":
                     else:
                         supabase.table("alunos").insert(dados).execute()
                         registrar_log("CADASTRO", f_nome)
-                    
+                   
                     # --- ESSA É A LINHA QUE RESOLVE O PROBLEMA ---
                     st.cache_data.clear() # Limpa a memória para buscar a lista atualizada
-                    
+                   
                     st.success("✅ Salvo com sucesso!")
                     st.session_state.pagina_ativa = "🔍 Consulta"
                     time.sleep(1)
