@@ -37,40 +37,37 @@ st.set_page_config(
     page_title="Facility - Gestão",
     page_icon="logo.png",
     layout="centered",
-    initial_sidebar_state="collapsed"  # Começa fechado, mas permite abrir
+    initial_sidebar_state="collapsed"
 )
 
-# --- LIMPEZA TOTAL COM BOTÃO DE MENU FORÇADO ---
+# --- ESTILIZAÇÃO E LIMPEZA (BLOCO ÚNICO) ---
 st.markdown("""
     <style>
-    /* 1. Torna o header invisível mas mantém o espaço para o botão existir */
-    header {
-        visibility: hidden;
-        background-color: rgba(0,0,0,0) !important;
+    /* 1. Esconde a linha colorida do topo e os 3 pontinhos (Toolbar) */
+    [data-testid="stDecoration"], 
+    [data-testid="stToolbar"] {
+        display: none !important;
     }
 
-    /* 2. Força especificamente o botão de abrir/fechar a ser visível e interativo */
+    /* 2. Força o botão de abrir/fechar o menu a ficar visível */
     [data-testid="stSidebarCollapseButton"] {
         visibility: visible !important;
         display: flex !important;
         position: fixed !important;
-        top: 10px !important;
-        left: 10px !important;
-        color: #d9534f !important; /* Cor vermelha para você enxergar ele bem */
+        top: 15px !important;
+        left: 15px !important;
+        color: #d9534f !important;
         z-index: 999999;
     }
 
-    /* 3. Esconde o menu de 3 pontinhos e o botão de Deploy */
-    [data-testid="stToolbar"], .stAppDeployButton {
+    /* 3. Esconde o botão de Deploy e o rodapé */
+    .stAppDeployButton, footer {
         display: none !important;
     }
 
-    /* 4. Remove o rodapé */
-    footer {visibility: hidden;}
-
-    /* 5. Ajusta o topo para não ficar espaço em branco demais */
+    /* 4. Ajusta o respiro do topo para o conteúdo não subir demais */
     .stAppViewBlockContainer {
-        padding-top: 2rem !important;
+        padding-top: 3.5rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
