@@ -40,41 +40,37 @@ st.set_page_config(
     initial_sidebar_state="collapsed"  # Começa fechado, mas permite abrir
 )
 
-# --- LIMPEZA TOTAL E DEFINITIVA DA INTERFACE (VERSÃO COM MENU ATIVO) ---
+# --- LIMPEZA TOTAL COM BOTÃO DE MENU FORÇADO ---
 st.markdown("""
     <style>
-    /* 1. Esconde a barra de ferramentas (3 pontinhos), mas MANTÉM o header para o botão existir */
-    [data-testid="stToolbar"] {visibility: hidden !important;}
-    footer {visibility: hidden;}
-    
-    /* 2. REMOVE A BARRA INFERIOR DIREITA (Manage App) */
-    div[data-testid="stStatusWidget"] {
-        display: none !important;
+    /* 1. Torna o header invisível mas mantém o espaço para o botão existir */
+    header {
+        visibility: hidden;
+        background-color: rgba(0,0,0,0) !important;
     }
 
-    /* 3. ESCONDE O BOTÃO DE DEPLOY/SHARE */
-    .stAppDeployButton {
-        display: none !important;
-    }
-
-    /* 4. GARANTE QUE O BOTÃO DE ABRIR O MENU FIQUE VISÍVEL E BONITO */
+    /* 2. Força especificamente o botão de abrir/fechar a ser visível e interativo */
     [data-testid="stSidebarCollapseButton"] {
         visibility: visible !important;
         display: flex !important;
-        color: #d9534f !important; /* Cor vermelha para destacar no topo */
-        background-color: transparent !important;
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        color: #d9534f !important; /* Cor vermelha para você enxergar ele bem */
+        z-index: 999999;
     }
 
-    /* 5. REMOVE O ESPAÇO EXTRA NO TOPO */
-    .stAppViewBlockContainer {
-        padding-top: 30px !important;
-        padding-bottom: 0px !important;
-    }
-    
-    /* 6. TIRA O FOCO DE OUTROS BOTÕES FLUTUANTES */
-    button[title="View profile"], 
-    button[aria-label="Manage app"] {
+    /* 3. Esconde o menu de 3 pontinhos e o botão de Deploy */
+    [data-testid="stToolbar"], .stAppDeployButton {
         display: none !important;
+    }
+
+    /* 4. Remove o rodapé */
+    footer {visibility: hidden;}
+
+    /* 5. Ajusta o topo para não ficar espaço em branco demais */
+    .stAppViewBlockContainer {
+        padding-top: 2rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -86,7 +82,6 @@ hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
             footer {visibility: hidden;}
-            header {visibility: hidden;}
             #stDecoration {display:none;}
             </style>
             """
